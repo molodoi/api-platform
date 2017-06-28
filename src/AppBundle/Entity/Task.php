@@ -5,10 +5,20 @@ namespace AppBundle\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * Task
- * @ApiResource(attributes={"filters"={"task.search","task.range","task.order", "task.date"}})
+ * @ApiResource(
+ *     attributes={
+ *          "filters"={"task.search","task.range","task.order", "task.date"},
+ *          "normalization_context"={"groups"={"read"}},
+ *          "denormalization_context"={"groups"={"write"}}
+ *     },
+ *     itemOperations={
+ *          "put"={"method"="PUT", "denormalization_context"={"groups"={"put"}}}
+ *     }
+ * )
  * ApiResource(attributes={"filters"={"generic.search","generic.range","generic.order", "generic.date"}})
  * @ORM\Table(name="task")
  * @ORM\Entity(repositoryClass="AppBundle\Repository\TaskRepository")
@@ -21,6 +31,7 @@ class Task
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
+     * @Groups({"read"})
      */
     private $id;
 
@@ -28,6 +39,7 @@ class Task
      * @var string
      *
      * @ORM\Column(name="name", type="string", length=255)
+     * @Groups({"read", "write"})
      */
     private $name;
 
@@ -35,6 +47,7 @@ class Task
      * @var string
      *
      * @ORM\Column(name="time", type="string", length=255)
+     * @Groups({"read", "write", "put"})
      */
     private $time;
 
@@ -42,11 +55,13 @@ class Task
      * @var string
      *
      * @ORM\Column(name="priority", type="string", length=255)
+     * @Groups({"read", "write", "put"})
      */
     private $priority;
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
+     * @Groups({"read", "write"})
      */
     public $user;
 
@@ -54,6 +69,7 @@ class Task
      * @var \DateTime
      *
      * @ORM\Column(name="created_at", type="datetime")
+     * @Groups({"read"})
      */
     public $createdAt;
 
