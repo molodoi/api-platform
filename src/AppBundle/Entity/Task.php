@@ -12,15 +12,19 @@ use Symfony\Component\Serializer\Annotation\Groups;
  * @ApiResource(
  *     attributes={
  *          "filters"={"task.search","task.range","task.order", "task.date"},
- *          "normalization_context"={"groups"={"read"}},
- *          "denormalization_context"={"groups"={"write"}}
+ *          "normalization_context"={"groups"={"read", "task"}},
+ *          "denormalization_context"={"groups"={"write"}},
+ *          "pagination_items_per_page"=15
  *     },
  *     itemOperations={
+ *          "get"={"method"="GET"},
+ *          "delete"={"method"="DELETE"},
  *          "put"={"method"="PUT", "denormalization_context"={"groups"={"put"}}}
- *     }
+ *     } *
  * )
  * ApiResource(attributes={"filters"={"generic.search","generic.range","generic.order", "generic.date"}})
  * @ORM\Table(name="task")
+ * @ORM\HasLifecycleCallbacks
  * @ORM\Entity(repositoryClass="AppBundle\Repository\TaskRepository")
  */
 class Task
@@ -40,6 +44,7 @@ class Task
      *
      * @ORM\Column(name="name", type="string", length=255)
      * @Groups({"read", "write"})
+     * @Assert\NotBlank()
      */
     private $name;
 
@@ -48,20 +53,30 @@ class Task
      *
      * @ORM\Column(name="time", type="string", length=255)
      * @Groups({"read", "write", "put"})
+     * @Assert\NotBlank()
+     * @Assert\Choice(choices = {"10", "20", "30", "40", "50", "60"}, message = "Choose a valid time.")
      */
     private $time;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="priority", type="string", length=255)
+     * @ORM\Column(name="priority", type="integer")
      * @Groups({"read", "write", "put"})
+     * @Assert\NotBlank()
+     * @Assert\Range(
+     *      min = 0,
+     *      max = 10,
+     *      minMessage = "You must be at least {{ limit }}",
+     *      maxMessage = "You cannot be taller than {{ limit }}"
+     * )
      */
     private $priority;
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
-     * @Groups({"read", "write"})
+     * @Groups({"read", "write", "task"})
+     * @Assert\NotBlank()
      */
     public $user;
 
@@ -72,6 +87,12 @@ class Task
      * @Groups({"read"})
      */
     public $createdAt;
+
+
+    public function __construct()
+    {
+        $this->createdAt= new \DateTime();
+    }
 
 
     /**
@@ -188,6 +209,12 @@ class Task
         $this->createdAt = $createdAt;
     }
 
-
+    /**
+     * @ORM\PreUpdate()
+     */
+    public function preUpdate()
+    {
+        $this->createdAt = new \DateTime();
+    }
 }
 

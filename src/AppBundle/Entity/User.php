@@ -5,11 +5,15 @@ namespace AppBundle\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * User
  * @ApiResource()
- * ApiResource(attributes={"filters"={"generic.search","generic.range","generic.order", "generic.date"}})
+ * ApiResource(attributes={
+ *      "filters"={"generic.search","generic.range","generic.order", "generic.date"},
+ *      "pagination_items_per_page"=10
+ * })
  * @ORM\Table(name="user")
  * @ORM\Entity(repositoryClass="AppBundle\Repository\UserRepository")
  */
@@ -28,6 +32,7 @@ class User
      * @var string
      *
      * @ORM\Column(name="firstname", type="string", length=255)
+     * @Groups({"task"})
      */
     private $firstname;
 
@@ -35,6 +40,7 @@ class User
      * @var string
      *
      * @ORM\Column(name="lastname", type="string", length=255)
+     * @Groups({"task"})
      */
     private $lastname;
 
