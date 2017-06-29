@@ -1,110 +1,66 @@
 <?php
 
+// src/AppBundle/Entity/User.php
+
 namespace AppBundle\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
+use FOS\UserBundle\Model\User as BaseUser;
+use FOS\UserBundle\Model\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
- * User
- * @ApiResource()
- * ApiResource(attributes={
- *      "filters"={"generic.search","generic.range","generic.order", "generic.date"},
- *      "pagination_items_per_page"=10
+ * @ORM\Entity
+ * @ORM\Table(name="fos_user")
+ * @ApiResource(attributes={
+ *     "normalization_context"={"groups"={"user", "user-read"}},
+ *     "denormalization_context"={"groups"={"user", "user-write"}}
  * })
- * @ORM\Table(name="user")
- * @ORM\Entity(repositoryClass="AppBundle\Repository\UserRepository")
  */
-class User
+class User extends BaseUser
 {
     /**
-     * @var int
-     *
-     * @ORM\Column(name="id", type="integer")
      * @ORM\Id
+     * @ORM\Column(type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    protected $id;
 
     /**
-     * @var string
-     *
-     * @ORM\Column(name="firstname", type="string", length=255)
-     * @Groups({"task"})
+     * @Groups({"user"})
      */
-    private $firstname;
+    protected $email;
 
     /**
-     * @var string
-     *
-     * @ORM\Column(name="lastname", type="string", length=255)
-     * @Groups({"task"})
+     * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups({"user"})
      */
-    private $lastname;
-
+    protected $fullname;
 
     /**
-     * Get id
-     *
-     * @return int
+     * @Groups({"user-write"})
      */
-    public function getId()
+    protected $plainPassword;
+
+    /**
+     * @Groups({"user"})
+     */
+    protected $username;
+
+    public function setFullname($fullname)
     {
-        return $this->id;
-    }
-
-    /**
-     * Set firstname
-     *
-     * @param string $firstname
-     *
-     * @return User
-     */
-    public function setFirstname($firstname)
-    {
-        $this->firstname = $firstname;
+        $this->fullname = $fullname;
 
         return $this;
     }
-
-    /**
-     * Get firstname
-     *
-     * @return string
-     */
-    public function getFirstname()
+    public function getFullname()
     {
-        return $this->firstname;
+        return $this->fullname;
     }
 
-    /**
-     * Set lastname
-     *
-     * @param string $lastname
-     *
-     * @return User
-     */
-    public function setLastname($lastname)
+    public function isUser(UserInterface $user = null)
     {
-        $this->lastname = $lastname;
-
-        return $this;
-    }
-
-    /**
-     * Get lastname
-     *
-     * @return string
-     */
-    public function getLastname()
-    {
-        return $this->lastname;
-    }
-
-    public function getFullName(){
-        return sprintf('%s %s',$this->getFirstname(), $this->getLastname());
+        return $user instanceof self && $user->id === $this->id;
     }
 }
-
