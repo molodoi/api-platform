@@ -9,3 +9,6 @@ api:
 app:
     resource: '@AppBundle/Action/'
     type:     'annotation'
+
+fos_user:
+    resource: "@FOSUserBundle/Resources/config/routing/all.xml"
